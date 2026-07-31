@@ -1,37 +1,45 @@
-CTE-Net
+# CTE-Net
 
-Contextualized Transfer Entropy Network for EEG-Based ADHD Classification
+## Contextualized Transfer Entropy Network for EEG-Based ADHD Classification
 
+[![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Jupyter](https://img.shields.io/badge/Jupyter-Notebooks-F37626?logo=jupyter&logoColor=white)](https://jupyter.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-Models-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![License](https://img.shields.io/badge/License-To%20be%20defined-lightgrey)](#license)
 
+CTE-Net is an end-to-end deep-learning architecture for classifying
+attention-deficit/hyperactivity disorder (ADHD) from pediatric
+electroencephalography (EEG). It combines Transformer-based contextualization
+with nonlinear temporal filtering, Takens delay-coordinate reconstruction, and
+differentiable matrix-based Transfer Entropy (TE).
 
-CTE-Net is an end-to-end deep-learning architecture for classifyingattention-deficit/hyperactivity disorder (ADHD) from pediatricelectroencephalography (EEG). It combines Transformer-based contextualizationwith nonlinear temporal filtering, Takens delay-coordinate reconstruction, anddifferentiable matrix-based Transfer Entropy (TE).
+Unlike pipelines in which connectivity is computed as a fixed preprocessing
+step, CTE-Net learns task-oriented representations and directed predictive
+information dependencies jointly with the classifier. The resulting TE matrix
+provides an explicit representation of nonlinear, time-delayed, and directional
+interactions between EEG channels.
 
-Unlike pipelines in which connectivity is computed as a fixed preprocessingstep, CTE-Net learns task-oriented representations and directed predictiveinformation dependencies jointly with the classifier. The resulting TE matrixprovides an explicit representation of nonlinear, time-delayed, and directionalinteractions between EEG channels.
+> **Research status:** this repository accompanies the manuscript
+> *Transformer-Based Modeling of Directed Transfer Entropy Connectivity for
+> EEG-Based ADHD Classification in Children*. The code and documentation may
+> change while the manuscript is under review.
 
-Research status: this repository accompanies the manuscriptTransformer-Based Modeling of Directed Transfer Entropy Connectivity forEEG-Based ADHD Classification in Children. The code and documentation maychange while the manuscript is under review.
+## Highlights
 
-Highlights
+- End-to-end learning from multichannel EEG windows.
+- Global content-based contextualization with a Transformer encoder.
+- Channel-wise nonlinear temporal filtering.
+- Takens delay-coordinate embeddings for source and target dynamics.
+- Differentiable Transfer Entropy based on Rényi's matrix entropy and a
+  rational quadratic kernel.
+- Explicit directed connectivity features for model inspection.
+- Subject-wise evaluation designed to prevent participant leakage.
+- Analysis of within-subject variability across the network stages.
+- Comparisons with EEGNet, ShallowConvNet, T-GARNet, IMC-BGT, and MultiStream.
 
-End-to-end learning from multichannel EEG windows.
+## Model overview
 
-Global content-based contextualization with a Transformer encoder.
-
-Channel-wise nonlinear temporal filtering.
-
-Takens delay-coordinate embeddings for source and target dynamics.
-
-Differentiable Transfer Entropy based on Rényi's matrix entropy and arational quadratic kernel.
-
-Explicit directed connectivity features for model inspection.
-
-Subject-wise evaluation designed to prevent participant leakage.
-
-Analysis of within-subject variability across the network stages.
-
-Comparisons with EEGNet, ShallowConvNet, T-GARNet, IMC-BGT, and MultiStream.
-
-Model overview
-
+```mermaid
 flowchart TD
     A["EEG window<br/>19 × 512"] --> B["Transformer<br/>contextualization"]
     B --> C["Channel-wise nonlinear<br/>temporal filtering"]
@@ -39,93 +47,56 @@ flowchart TD
     D --> E["Differentiable directed<br/>Transfer Entropy"]
     E --> F["Connectivity matrix<br/>19 × 19"]
     F --> G["Binary classifier<br/>ADHD vs. control"]
+```
 
-For an EEG window (\mathbf{X}\in\mathbb{R}^{C\times T}), CTE-Net firstcontextualizes the complete multichannel sequence. The filtered signals arethen reconstructed into source-past, target-past, and target-present states.For every ordered electrode pair, the TE layer estimates the predictiveinformation transferred from the source to the target beyond the informationalready contained in the target's own history.
+For an EEG window \(\mathbf{X}\in\mathbb{R}^{C\times T}\), CTE-Net first
+contextualizes the complete multichannel sequence. The filtered signals are
+then reconstructed into source-past, target-past, and target-present states.
+For every ordered electrode pair, the TE layer estimates the predictive
+information transferred from the source to the target beyond the information
+already contained in the target's own history.
 
-The estimated values should be interpreted as directed predictivedependencies, not as definitive evidence of causal influence.
+The estimated values should be interpreted as **directed predictive
+dependencies**, not as definitive evidence of causal influence.
 
-Dataset and preprocessing
+## Dataset and preprocessing
 
-The experiments use the publicEEG Data for ADHD/Control Childrendataset.
+The experiments use the public
+[EEG Data for ADHD/Control Children](https://ieee-dataport.org/open-access/eeg-data-adhd-control-children)
+dataset.
 
-Property
+| Property | Experimental setting |
+| --- | --- |
+| Analyzed cohort | 120 participants: 60 ADHD and 60 controls |
+| Age range | 7–12 years |
+| EEG montage | 19 channels, international 10–20 system |
+| Sampling rate | 128 Hz |
+| Task | Visual continuous-performance task |
+| Window length | 4 s (512 samples) |
+| Window overlap | 50% |
+| Additional preprocessing | No artifact rejection, ICA, frequency filtering, or band decomposition |
+| Evaluation split | Five fixed stratified subject-wise folds |
+| Repetitions | Ten random seeds; 50 trained models in total |
 
-Experimental setting
+The dataset is not redistributed in this repository. Download it from the
+original source and update the dataset paths in the corresponding notebooks.
+Keep every participant exclusively in one training, validation, or test subset
+to avoid subject-level information leakage.
 
-Analyzed cohort
+## Architecture configuration
 
-120 participants: 60 ADHD and 60 controls
+| Stage | Main configuration |
+| --- | --- |
+| Input | \(C=19\), \(T=512\) |
+| Transformer | 2 layers, 2 attention heads, embedding size 32, feed-forward size 256, dropout 0.4 |
+| Temporal filter | Depthwise Conv1D, kernel size 99, stride 1, average pooling 4 |
+| Takens embedding | \(D_x=4\), \(D_y=2\), delay \(\tau=5\), prediction horizon \(\mu=5\) |
+| Kernel TE | Rational quadratic kernel, \(\alpha_{\mathrm{RQ}}=1\), Rényi order \(\alpha_R=2\) |
+| Classifier | Dense layer with 128 units, dropout 0.1, one sigmoid output |
 
-Age range
+## Repository structure
 
-7–12 years
-
-EEG montage
-
-19 channels, international 10–20 system
-
-Sampling rate
-
-128 Hz
-
-Task
-
-Visual continuous-performance task
-
-Window length
-
-4 s (512 samples)
-
-Window overlap
-
-50%
-
-Additional preprocessing
-
-No artifact rejection, ICA, frequency filtering, or band decomposition
-
-Evaluation split
-
-Five fixed stratified subject-wise folds
-
-Repetitions
-
-Ten random seeds; 50 trained models in total
-
-The dataset is not redistributed in this repository. Download it from theoriginal source and update the dataset paths in the corresponding notebooks.Keep every participant exclusively in one training, validation, or test subsetto avoid subject-level information leakage.
-
-Architecture configuration
-
-Stage
-
-Main configuration
-
-Input
-
-(C=19), (T=512)
-
-Transformer
-
-2 layers, 2 attention heads, embedding size 32, feed-forward size 256, dropout 0.4
-
-Temporal filter
-
-Depthwise Conv1D, kernel size 99, stride 1, average pooling 4
-
-Takens embedding
-
-(D_x=4), (D_y=2), delay (\tau=5), prediction horizon (\mu=5)
-
-Kernel TE
-
-Rational quadratic kernel, (\alpha_{\mathrm{RQ}}=1), Rényi order (\alpha_R=2)
-
-Classifier
-
-Dense layer with 128 units, dropout 0.1, one sigmoid output
-
-Repository structure
-
+```text
 CTE-Net/
 ├── Models/
 │   ├── EEGNet-Pytorch.ipynb
@@ -136,205 +107,150 @@ CTE-Net/
 │   ├── tdha-t-tekt...ipynb
 │   └── tdha-t-tektnet-2.ipynb
 └── README.md
+```
 
-The Models/ directory contains the proposed model experiments and thebaseline implementations used in the comparative evaluation. Some notebookfilenames retain their original experimental names; consult the first Markdowncell of each notebook for its model and purpose.
+The `Models/` directory contains the proposed model experiments and the
+baseline implementations used in the comparative evaluation. Some notebook
+filenames retain their original experimental names; consult the first Markdown
+cell of each notebook for its model and purpose.
 
-Getting started
+## Getting started
 
-1. Clone the repository
+### 1. Clone the repository
 
+```bash
 git clone https://github.com/alegomezri/CTE-Net.git
 cd CTE-Net
+```
 
-2. Create an isolated environment
+### 2. Create an isolated environment
 
+```bash
 python -m venv .venv
+```
 
 Activate it on Linux or macOS:
 
+```bash
 source .venv/bin/activate
+```
 
 Activate it on Windows PowerShell:
 
+```powershell
 .\.venv\Scripts\Activate.ps1
+```
 
-3. Install the dependencies
+### 3. Install the dependencies
 
-The notebooks use deep-learning, scientific-computing, optimization, and EEGanalysis libraries. Install the packages required by the notebook you intendto run. A typical environment includes:
+The notebooks use deep-learning, scientific-computing, optimization, and EEG
+analysis libraries. Install the packages required by the notebook you intend
+to run. A typical environment includes:
 
+```bash
 pip install jupyter numpy pandas scipy scikit-learn matplotlib seaborn \
     torch optuna
+```
 
-If a notebook uses TensorFlow/Keras or additional EEG utilities, install thosedependencies as indicated by its import cells. A pinned requirements.txt isrecommended for exact reproduction.
+If a notebook uses TensorFlow/Keras or additional EEG utilities, install those
+dependencies as indicated by its import cells. A pinned `requirements.txt` is
+recommended for exact reproduction.
 
-4. Prepare the data
+### 4. Prepare the data
 
-Download the dataset from IEEE DataPort.
-
-Store it outside version control.
-
-Update the input and output paths in the selected notebook.
-
-Verify that subject identifiers are retained before generating the folds.
+1. Download the dataset from IEEE DataPort.
+2. Store it outside version control.
+3. Update the input and output paths in the selected notebook.
+4. Verify that subject identifiers are retained before generating the folds.
 
 Suggested local layout:
 
+```text
 CTE-Net/
 ├── data/                 # ignored by Git
 │   └── raw/
 ├── Models/
 └── results/
+```
 
-5. Run an experiment
+### 5. Run an experiment
 
+```bash
 jupyter lab
-
-Open the desired notebook under Models/ and execute its cells in order. For afair comparison, reuse the same subject-wise partitions, preprocessing,validation protocol, and random seeds for every model.
-
-Evaluation protocol
-
-Five-fold stratified group cross-validation.
-
-Twenty-four participants held out for testing in each fold.
-
-Subject-independent training, validation, and test subsets.
-
-Binary cross-entropy optimization with early stopping.
-
-Validation-based checkpoint selection.
-
-Hyperparameter optimization with 20 Optuna trials and pruning.
-
-ADHD treated as the positive class.
-
-Window-level decision threshold of 0.5.
-
-Metrics averaged across the five folds for each seed and summarized acrossten seeds.
-
-Paired two-sided Wilcoxon signed-rank tests with Holm correction for modelcomparisons.
-
-Main results
-
-Window-level classification
-
-Model
-
-Accuracy (%)
-
-Precision (%)
-
-Recall (%)
-
-EEGNet
-
-81.5 ± 2.1
-
-84.3 ± 2.2
-
-83.5 ± 3.6
-
-ShallowConvNet
-
-84.1 ± 1.7
-
-88.0 ± 2.9
-
-81.7 ± 2.4
-
-T-GARNet
-
-77.4 ± 0.5
-
-76.9 ± 0.8
-
-85.5 ± 1.1
-
-IMC-BGT
-
-66.1 ± 1.2
-
-68.2 ± 1.4
-
-74.4 ± 3.4
-
-MultiStream
-
-58.6 ± 0.6
-
-58.7 ± 0.3
-
-86.5 ± 2.2
-
-CTE-Net
-
-80.7 ± 1.7
-
-82.2 ± 2.1
-
-84.0 ± 2.3
-
-CTE-Net was statistically comparable to EEGNet across accuracy, precision, andrecall. ShallowConvNet achieved higher accuracy and precision, whereas CTE-Netoutperformed T-GARNet, IMC-BGT, and MultiStream in accuracy and precision underthe reported corrected comparisons. The principal contribution of CTE-Net istherefore not a claim of uniform predictive superiority, but the combination ofcompetitive classification with an explicit nonlinear and directedconnectivity representation.
-
-Representation-space organization
-
-Representation
-
-Window silhouette ↑
-
-Participant-centroid silhouette ↑
-
-Same/different-class distance ratio ↓
-
-Raw EEG
-
-0.0558
-
-0.0210
-
-0.9887
-
-Transformer output
-
-0.0712
-
-0.2640
-
-0.7056
-
-Temporal filter
-
-0.1326
-
-0.3316
-
-0.6326
-
-Transfer Entropy
-
-0.2148
-
-0.3557
-
-0.6031
-
-The directed TE representation yielded the lowest within-subject dispersion,with a median reduction of 38.35% relative to raw EEG. The result remainedconsistent across alternative PCA dimensionalities and distance definitions.
-
-Reproducibility notes
-
-Do not randomly split individual EEG windows across subsets.
-
-Record the random seed, fold, checkpoint, and preprocessing configuration foreach run.
-
-Fit transformations used for evaluation, including standardization and PCA,without access to held-out participant information.
-
-Keep dataset files, checkpoints, and generated results out of Git unless theirredistribution is permitted.
-
-Report whether results correspond to window-level or participant-leveldecisions.
-
-Citation
-
-If this code contributes to your research, please cite the accompanyingmanuscript. The bibliographic information below should be updated when thearticle receives its final journal, volume, pages, and DOI.
-
+```
+
+Open the desired notebook under `Models/` and execute its cells in order. For a
+fair comparison, reuse the same subject-wise partitions, preprocessing,
+validation protocol, and random seeds for every model.
+
+## Evaluation protocol
+
+- Five-fold stratified group cross-validation.
+- Twenty-four participants held out for testing in each fold.
+- Subject-independent training, validation, and test subsets.
+- Binary cross-entropy optimization with early stopping.
+- Validation-based checkpoint selection.
+- Hyperparameter optimization with 20 Optuna trials and pruning.
+- ADHD treated as the positive class.
+- Window-level decision threshold of 0.5.
+- Metrics averaged across the five folds for each seed and summarized across
+  ten seeds.
+- Paired two-sided Wilcoxon signed-rank tests with Holm correction for model
+  comparisons.
+
+## Main results
+
+### Window-level classification
+
+| Model | Accuracy (%) | Precision (%) | Recall (%) |
+| --- | ---: | ---: | ---: |
+| EEGNet | 81.5 ± 2.1 | 84.3 ± 2.2 | 83.5 ± 3.6 |
+| ShallowConvNet | **84.1 ± 1.7** | **88.0 ± 2.9** | 81.7 ± 2.4 |
+| T-GARNet | 77.4 ± 0.5 | 76.9 ± 0.8 | 85.5 ± 1.1 |
+| IMC-BGT | 66.1 ± 1.2 | 68.2 ± 1.4 | 74.4 ± 3.4 |
+| MultiStream | 58.6 ± 0.6 | 58.7 ± 0.3 | **86.5 ± 2.2** |
+| **CTE-Net** | **80.7 ± 1.7** | **82.2 ± 2.1** | **84.0 ± 2.3** |
+
+CTE-Net was statistically comparable to EEGNet across accuracy, precision, and
+recall. ShallowConvNet achieved higher accuracy and precision, whereas CTE-Net
+outperformed T-GARNet, IMC-BGT, and MultiStream in accuracy and precision under
+the reported corrected comparisons. The principal contribution of CTE-Net is
+therefore not a claim of uniform predictive superiority, but the combination of
+competitive classification with an explicit nonlinear and directed
+connectivity representation.
+
+### Representation-space organization
+
+| Representation | Window silhouette ↑ | Participant-centroid silhouette ↑ | Same/different-class distance ratio ↓ |
+| --- | ---: | ---: | ---: |
+| Raw EEG | 0.0558 | 0.0210 | 0.9887 |
+| Transformer output | 0.0712 | 0.2640 | 0.7056 |
+| Temporal filter | 0.1326 | 0.3316 | 0.6326 |
+| **Transfer Entropy** | **0.2148** | **0.3557** | **0.6031** |
+
+The directed TE representation yielded the lowest within-subject dispersion,
+with a median reduction of **38.35%** relative to raw EEG. The result remained
+consistent across alternative PCA dimensionalities and distance definitions.
+
+## Reproducibility notes
+
+- Do not randomly split individual EEG windows across subsets.
+- Record the random seed, fold, checkpoint, and preprocessing configuration for
+  each run.
+- Fit transformations used for evaluation, including standardization and PCA,
+  without access to held-out participant information.
+- Keep dataset files, checkpoints, and generated results out of Git unless their
+  redistribution is permitted.
+- Report whether results correspond to window-level or participant-level
+  decisions.
+
+## Citation
+
+If this code contributes to your research, please cite the accompanying
+manuscript. The bibliographic information below should be updated when the
+article receives its final journal, volume, pages, and DOI.
+
+```bibtex
 @article{gomezrivera2026ctenet,
   title   = {Transformer-Based Modeling of Directed Transfer Entropy
              Connectivity for EEG-Based ADHD Classification in Children},
@@ -343,27 +259,37 @@ If this code contributes to your research, please cite the accompanyingmanuscrip
   year    = {2026},
   note    = {Manuscript under review}
 }
+```
 
-Authors
+## Authors
 
-A. Gomez-Rivera — Signal Processing and Recognition Group, UniversidadNacional de Colombia
+- **A. Gomez-Rivera** — Signal Processing and Recognition Group, Universidad
+  Nacional de Colombia
+- **Andrés M. Álvarez-Meza** — Signal Processing and Recognition Group,
+  Universidad Nacional de Colombia
+- **D. Cárdenas-Peña** — Automatics Research Group, Universidad Tecnológica de
+  Pereira
 
-Andrés M. Álvarez-Meza — Signal Processing and Recognition Group,Universidad Nacional de Colombia
+## Funding
 
-D. Cárdenas-Peña — Automatics Research Group, Universidad Tecnológica dePereira
+This work was supported by the research program *Alianza Científica con Enfoque
+Comunitario para Mitigar Brechas de Atención y Manejo de Trastornos Mentales
+Relacionados con Impulsividad en Colombia - ACEMATE*, grant 111091991908.
 
-Funding
+## Responsible use
 
-This work was supported by the research program Alianza Científica con EnfoqueComunitario para Mitigar Brechas de Atención y Manejo de Trastornos MentalesRelacionados con Impulsividad en Colombia - ACEMATE, grant 111091991908.
+CTE-Net is intended for research purposes. It is not a medical device and must
+not be used as a stand-alone diagnostic system. ADHD assessment requires
+qualified clinical evaluation and information from multiple sources.
 
-Responsible use
+## License
 
-CTE-Net is intended for research purposes. It is not a medical device and mustnot be used as a stand-alone diagnostic system. ADHD assessment requiresqualified clinical evaluation and information from multiple sources.
+No software license has yet been specified. Add a `LICENSE` file before
+redistributing or accepting external contributions. The license of the
+accompanying article does not automatically define the license of this source
+code.
 
-License
+## Contact
 
-No software license has yet been specified. Add a LICENSE file beforeredistributing or accepting external contributions. The license of theaccompanying article does not automatically define the license of this sourcecode.
-
-Contact
-
-For questions about the repository or the manuscript, please contactA. Gomez-Rivera.
+For questions about the repository or the manuscript, please contact
+[A. Gomez-Rivera](mailto:yeagomezri@unal.edu.co).
