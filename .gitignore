@@ -1,0 +1,10 @@
+data/
+*.mat
+results/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+*.log
+optuna_journal*
+*.egg-info/
+.venv/
