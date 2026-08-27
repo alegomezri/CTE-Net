@@ -279,7 +279,8 @@ article receives its final journal, volume, pages, and DOI.
 @article{gomezrivera2026ctenet,
   title   = {Transformer-Based Modeling of Directed Transfer Entropy
              Connectivity for EEG-Based ADHD Classification in Children},
-  author  = {Gomez-Rivera, A. and Alvarez-Meza, Andres M. and
+  author  = {Gomez-Rivera, A. and Pastrana-Cortes, J. D. and
+             Alvarez-Meza, Andres M. and Gil-Gonzalez, J. and
              Cardenas-Pena, D.},
   year    = {2026},
   note    = {Manuscript under review}
@@ -295,12 +296,11 @@ repository that extends the analyses in `Models/`.
 
 ## Authors
 
-- **A. Gomez-Rivera** — Signal Processing and Recognition Group, Universidad
-  Nacional de Colombia
-- **Andrés M. Álvarez-Meza** — Signal Processing and Recognition Group,
-  Universidad Nacional de Colombia
-- **D. Cárdenas-Peña** — Automatics Research Group, Universidad Tecnológica de
-  Pereira
+- **A. Gomez-Rivera** — Signal Processing and Recognition Group, Universidad Nacional de Colombia
+- **J. D. Pastrana-Cortés** — Automatics Research Group, Universidad Tecnológica de Pereira
+- **Andrés M. Álvarez-Meza** — Signal Processing and Recognition Group, Universidad Nacional de Colombia
+- **J. Gil-Gonzalez** — Automatics Research Group, Universidad Tecnológica de Pereira
+- **D. Cárdenas-Peña** — Automatics Research Group, Universidad Tecnológica de Pereira
 
 ## Funding
 
