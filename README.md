@@ -79,9 +79,10 @@ dataset.
 | Repetitions | Ten random seeds; 50 trained models in total |
 
 The dataset is not redistributed in this repository. Download it from the
-original source and update the dataset paths in the corresponding notebooks.
-Keep every participant exclusively in one training, validation, or test subset
-to avoid subject-level information leakage.
+original source and place it under `data/raw/` as described in
+[Prepare the data](#4-prepare-the-data). Keep every participant exclusively in
+one training, validation, or test subset to avoid subject-level information
+leakage.
 
 ## Architecture configuration
 
@@ -98,21 +99,31 @@ to avoid subject-level information leakage.
 
 ```text
 CTE-Net/
-├── Models/
+├── Models/                  # CTE-Net and every baseline, one notebook each
+│   ├── tdha-CTE-Net.ipynb       # proposed model (filename is a historical artifact)
 │   ├── EEGNet-Pytorch.ipynb
-│   ├── IM-CBGT.ipynb
-│   ├── MultiStream.ipynb
 │   ├── Shallow-Pytorch.ipynb
 │   ├── T-Garnet.ipynb
-│   ├── tdha-t-tekt...ipynb
-│   └── tdha-t-tektnet-2.ipynb
-└── README.md
+│   ├── IM-CBGT.ipynb
+│   └── MultiStream.ipynb
+├── Ablation/                # CTE-Net with the Transformer and/or TE branch removed
+│   ├── cte-net-sin-trans-5-folds.ipynb
+│   ├── cte-net-5-folds-con-trans-sin-te.ipynb
+│   └── cte-net-5-folds-sin-te-con-global.ipynb
+├── analysis/                 # connectivity interpretability and per-subject/statistical-test notebooks
+│   ├── Interpretability/
+│   └── Subjects/             # includes the Friedman cross-method comparison notebook
+├── tests/
+│   └── test_notebooks_smoke.py   # verifies every notebook still runs end-to-end
+├── requirements.txt
+└── data/                      # gitignored, populated locally — see "Prepare the data"
+    └── raw/
 ```
 
-The `Models/` directory contains the proposed model experiments and the
-baseline implementations used in the comparative evaluation. Some notebook
-filenames retain their original experimental names; consult the first Markdown
-cell of each notebook for its model and purpose.
+`Models/` and `Ablation/` are the notebooks referenced throughout this README.
+`analysis/` holds supplementary work built on top of CTE-Net's outputs
+(connectivity interpretability, per-subject and statistical-test notebooks);
+see [Repository provenance](#repository-provenance) for its origin.
 
 ## Getting started
 
@@ -143,35 +154,37 @@ Activate it on Windows PowerShell:
 
 ### 3. Install the dependencies
 
-The notebooks use deep-learning, scientific-computing, optimization, and EEG
-analysis libraries. Install the packages required by the notebook you intend
-to run. A typical environment includes:
-
 ```bash
-pip install jupyter numpy pandas scipy scikit-learn matplotlib seaborn \
-    torch optuna
+pip install -r requirements.txt
 ```
-
-If a notebook uses TensorFlow/Keras or additional EEG utilities, install those
-dependencies as indicated by its import cells. A pinned `requirements.txt` is
-recommended for exact reproduction.
 
 ### 4. Prepare the data
 
-1. Download the dataset from IEEE DataPort.
-2. Store it outside version control.
-3. Update the input and output paths in the selected notebook.
-4. Verify that subject identifiers are retained before generating the folds.
+1. Download the [EEG Data for ADHD/Control Children](https://ieee-dataport.org/open-access/eeg-data-adhd-control-children)
+   dataset from IEEE DataPort (`.mat` files, one per subject, split into
+   `ADHD_group` and `Control_group`).
+2. Place them under `data/raw/ieee/ADHD_group/` and `data/raw/ieee/Control_group/`
+   — `data/` is gitignored, so this never touches version control:
 
-Suggested local layout:
+   ```text
+   CTE-Net/
+   └── data/
+       └── raw/
+           ├── ieee/
+           │   ├── ADHD_group/     # *.mat, one per ADHD subject
+           │   └── Control_group/  # *.mat, one per control subject
+           └── folds.pkl           # the fixed 5-fold subject-wise split (see below)
+   ```
+3. `folds.pkl` fixes which subjects fall in which of the five cross-validation
+   folds so every model in this repo is compared on identical splits. Every
+   notebook in `Models/` and `Ablation/` loads it from `data/raw/folds.pkl`.
+   If you don't have it, generate one with `StratifiedGroupKFold(n_splits=5,
+   shuffle=True, random_state=42)` over the subject list — this reproduces the
+   methodology but not necessarily the exact published fold membership.
 
-```text
-CTE-Net/
-├── data/                 # ignored by Git
-│   └── raw/
-├── Models/
-└── results/
-```
+Each notebook's data path is a relative `os.path.join("..", "data", "raw", ...)`
+(or `Path("..") / "data" / "raw"` in `Ablation/`) — no per-notebook editing
+needed if you follow the layout above.
 
 ### 5. Run an experiment
 
@@ -179,9 +192,21 @@ CTE-Net/
 jupyter lab
 ```
 
-Open the desired notebook under `Models/` and execute its cells in order. For a
-fair comparison, reuse the same subject-wise partitions, preprocessing,
-validation protocol, and random seeds for every model.
+Open the desired notebook under `Models/` or `Ablation/` and execute its cells
+in order. For a fair comparison, reuse the same subject-wise partitions
+(`folds.pkl`), preprocessing, validation protocol, and random seeds for every
+model — this is already how the notebooks are wired.
+
+### 6. Verify everything runs
+
+```bash
+pytest tests/
+```
+
+Runs every notebook end-to-end with `CTE_NET_SMOKE_TEST=1` (shrinks
+epochs/seeds/Optuna trials so it finishes in minutes) against your local
+`data/raw/`. This checks the pipeline executes correctly — it is not a
+substitute for the full protocol described above.
 
 ## Evaluation protocol
 
@@ -260,6 +285,13 @@ article receives its final journal, volume, pages, and DOI.
   note    = {Manuscript under review}
 }
 ```
+
+## Repository provenance
+
+The notebooks under `analysis/` (connectivity interpretability, per-subject
+evaluation, and the Friedman statistical-test notebook) originate from
+[alegomezri/CTE-Net](https://github.com/alegomezri/CTE-Net), a companion
+repository that extends the analyses in `Models/`.
 
 ## Authors
 
