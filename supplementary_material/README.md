@@ -49,4 +49,41 @@ The code used to generate this supplementary file is provided in:
 ```text
 tests/all-window-predictions.ipynb
 ```
+## Supplementary Data S2
+
+### Signal-quality assessment and post hoc sensitivity analysis
+
+This directory contains the results of the post hoc signal-quality assessment and sensitivity analysis performed for CTE-Net. The analysis included 8,213 physical EEG windows from 120 participants and the corresponding out-of-fold predictions obtained across ten random training seeds.
+
+EEG windows were screened for nonfinite values, flat channels, extreme amplitude, kurtosis, frontal low- and high-frequency activity, and 50-Hz line noise. Participant-balanced median/MAD thresholds were estimated using 30 windows per participant. The primary criterion defined potentially contaminated windows using a robust threshold of \(z>5\), while \(z>4\) and \(z>6\) were examined as alternative sensitivity conditions.
+
+The model was not retrained. Instead, flagged windows were excluded from the previously generated out-of-fold predictions, after which the window- and participant-level metrics were recalculated. Therefore, this analysis evaluates the stability of the reported predictive performance and does not constitute an artifact-removal preprocessing pipeline.
+
+### Included files
+
+| File                                                             | Description                                                                                                                                                                                                                                                        |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CTE_Net_signal_quality_robust_thresholds.csv`                   | Median, MAD, and resulting robust thresholds for each signal-quality indicator.                                                                                                                                                                                    |
+| `CTE_Net_signal_quality_flag_summary.csv`                        | Number and percentage of windows flagged under the \(z>4\), \(z>5\), and \(z>6\) criteria.                                                                                                                                                                         |
+| `CTE_Net_signal_quality_reason_counts.csv`                       | Number of windows associated with each signal-quality indicator, including extreme kurtosis, 50-Hz line noise, peak-to-peak amplitude, absolute amplitude, and high-frequency activity.                                                                            |
+| `CTE_Net_artifact_sensitivity_window_metrics_summary.csv`        | Window-level performance metrics before and after excluding flagged windows under the evaluated thresholds.                                                                                                                                                        |
+| `CTE_Net_artifact_sensitivity_subject_metrics_95CI.csv`          | Participant-level performance before and after the primary \(z>5\) exclusion, including 95% confidence intervals from 5,000 stratified participant-level bootstrap resamples.                                                                                      |
+| `CTE_Net_artifact_sensitivity_subject_metrics_by_seed.csv`       | Participant-level metrics calculated separately for each random training seed and valid signal-quality condition.                                                                                                                                                  |
+| `CTE_Net_artifact_sensitivity_subject_coverage_by_condition.csv` | Number of participants retained under each signal-quality condition. The \(z>5\) and \(z>6\) conditions retained all 120 participants, whereas \(z>4\) left one participant without retained windows and was therefore omitted from participant-level comparisons. |
+| `CTE_Net_signal_quality_group_summary.csv`                       | Participant-level distribution of potentially contaminated windows for the ADHD and control groups.                                                                                                                                                                |
+| `CTE_Net_artifact_prediction_association.csv`                    | Spearman associations between the participant-level proportion of flagged windows and the consensus ADHD probability.                                                                                                                                              |
+
+### Main findings
+
+Under the primary \(z>5\) threshold, 358 of 8,213 EEG windows (4.36%) were identified as potentially contaminated. Excluding these windows changed the window-level performance metrics by no more than 0.51 percentage points and the participant-level metrics by no more than 0.17 percentage points. The participant-level accuracy changed from 83.42% to 83.50%, while ROC-AUC changed from 90.24% to 90.15%.
+
+Across the complete cohort, the proportion of flagged windows was not significantly associated with the consensus ADHD probability (\(\rho=0.062\), \(p=0.503\)). These results indicate that the principal classification findings remained stable after excluding windows with extreme signal-quality indicators.
+
+The flagged windows should be interpreted as potentially contaminated rather than confirmed artifacts. This post hoc analysis does not demonstrate that the retained signals or learned connectivity patterns are artifact-free.
+
+The code used to generate these supplementary files is provided in:
+
+```text
+tests/analysis-sensibility.ipynb
+```
 
