@@ -86,4 +86,23 @@ The code used to generate these supplementary files is provided in:
 ```text
 tests/analysis-sensibility.ipynb
 ```
+## Supplementary Data S3
 
+### Structural sensitivity analysis of the Transfer Entropy parameters
+
+These files report an additional structural sensitivity analysis of the Transfer Entropy module in CTE-Net. The analysis examined the Takens embedding dimensions \(D_x\) and \(D_y\), the reconstruction delay \(\tau\), and the interaction lag \(\mu\). It includes the selected reference configuration, \(D_x=6\), \(D_y=1\), \(\tau=2\), and \(\mu=2\), together with ten alternative completed configurations.
+
+The reported objective corresponds to the mean validation accuracy across the five fixed subject-wise folds. These results characterize the sensitivity of the validation objective to the structural parameters of the Transfer Entropy module; they do not constitute an independent test-set or external-validation comparison.
+
+### Included files
+
+| File                                                                  | Description                                                                                                                                                                                                                                                  |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Supplementary_Data_S3_TE_structural_sensitivity_trials(1).csv`       | Trial-level results for the 11 completed configurations, including the trial identifiers and state, execution timestamps, objective value, \(D_x\), \(D_y\), \(\tau\), \(\mu\), reference-configuration indicator, objective percentage, difference from the reference in percentage points, configuration label, rank, and configuration type. |
+| `Supplementary_Data_S3_TE_structural_sensitivity_summary(1).csv`      | Study-level summary containing the number of completed and alternative configurations, the reference parameters and objective, the rank of the reference configuration, and the minimum, maximum, mean, sample standard deviation, median, and range of the validation objective.                                      |
+
+### Main findings
+
+Across the 11 completed configurations, the mean validation accuracy ranged from 81.63% to 89.78%, with a mean of 86.00%, a sample standard deviation of 2.45 percentage points, and a median of 86.20%. The total range was 8.15 percentage points. The selected reference configuration achieved 81.63%, whereas the highest validation objective, 89.78%, was obtained with \(D_x=6\), \(D_y=1\), \(\tau=4\), and \(\mu=1\).
+
+Because the configurations were compared using the same internal validation objective employed during hyperparameter analysis, the results should be interpreted as a structural sensitivity assessment rather than as evidence of improved held-out or externally validated performance.
