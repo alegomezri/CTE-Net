@@ -103,6 +103,56 @@ The reported objective corresponds to the mean validation accuracy across the fi
 
 ### Main findings
 
+## Supplementary Data S4
+
+### Preprocessing and reference sensitivity analyses
+
+The [Supplementary Data S4](https://github.com/alegomezri/CTE-Net/tree/main/supplementary_material/Supplementary%20Data%20S4) directory provides analysis code for two complementary sensitivity experiments: frequency filtering with signal-quality screening and common-average referencing (CAR).
+
+The filtering experiment retrains CTE-Net using frequency-filtered EEG after fold-specific exclusion of windows with extreme signal-quality indicators. Thresholds are estimated using only the corresponding training participants, and the original A1/A2 condition is evaluated using the same retained test windows. Unlike the post hoc analysis in S2, this experiment includes model retraining.
+
+The CAR experiment retrains CTE-Net after common-average referencing and compares its predictions and learned connectivity with those obtained under the original A1/A2 reference. Both experiments use the five fixed subject-wise folds, ten random training seeds, and the fixed CTE-Net configuration without additional hyperparameter optimization.
+
+### Analysis notebooks
+
+| File | Description |
+| --- | --- |
+| `cte-net-filtering.ipynb` | Frequency-filtered and quality-screened EEG sensitivity workflow, including training and the corresponding analyses. |
+| `cte-net-car.ipynb` | Common-average-reference sensitivity workflow, including training and the corresponding analyses. |
+
+### Included CSV files
+
+| File | Description |
+| --- | --- |
+| `condition_training_summary.csv` | Training summary by condition, seed, and fold, including the selected epoch, validation accuracy, and number of epochs executed. |
+| `paired_fold_metrics.csv` | Fold-level classification metrics for the paired conditions. |
+| `window_metrics_mean_across_folds_by_seed.csv` | Window-level classification metrics averaged across folds within each random seed. |
+| `paired_window_predictions.csv` | Window-level predictions used in the paired comparison. |
+| `paired_subject_predictions_by_seed.csv` | Participant-level predictions for each random seed and condition. |
+| `participant_metrics_by_seed.csv` | Participant-level classification metrics for each random seed. |
+| `participant_metrics_95CI.csv` | Participant-level performance estimates and 95% confidence intervals, with participant, seed, and bootstrap counts. |
+| `participant_metric_differences_95CI.csv` | Paired differences in participant-level metrics with 95% bootstrap confidence intervals. The comparison column specifies the subtraction order. |
+| `participant_bootstrap_distribution.csv` | Bootstrap results underlying the participant-level statistical summaries. |
+| `participant_consensus_predictions.csv` | Participant-level consensus predictions across random seeds. |
+| `prediction_agreement_and_mcnemar.csv` | Correlation of participant probabilities, classification agreement, discordant classification counts, and exact McNemar p-values. |
+| `connectivity_stability_95CI.csv` | Connectivity concordance summaries with 95% confidence intervals, including Spearman correlation across 342 directed connections and Jaccard overlap for the strongest 10% of connections. |
+| `connectivity_stability_by_class.csv` | Connectivity concordance summarized by diagnostic class. |
+| `connectivity_stability_by_participant.csv` | Participant-level connectivity concordance results. |
+| `quality_features_all_windows.csv` | Window-level signal-quality indicators, including amplitude, kurtosis, spectral ratios, nonfinite values, and flat-channel indicators. |
+| `quality_thresholds_by_fold.csv` | Fold-specific robust signal-quality thresholds, reference medians and scales, threshold direction, and flag counts. |
+| `quality_summary_by_fold_and_split.csv` | Participant and window coverage by fold and split, including retained and flagged window counts. |
+
+### Scope of the currently supplied results
+
+The supplied performance summary, paired metric-difference, prediction-agreement, and connectivity-summary CSV files report `common_average_reference` versus `original_A1A2_same_windows`. The training summary likewise identifies the CAR condition. The current quality-coverage summary reports no excluded windows. These exports should therefore not be interpreted as the performance results or retained-window counts of the filtered and quality-screened experiment. The filtering notebook and quality-indicator/threshold files are provided, but separate filtering performance exports are not identified in the current directory.
+
+For CAR, the participant-level accuracy is 83.08% (95% CI: 77.67–88.08%), compared with 83.42% (95% CI: 78.25–88.25%) under the original reference on the same windows. The paired accuracy difference is −0.33 percentage points (95% CI: −2.33 to 1.75). Participant-level classification agreement is 94.17%, with an exact McNemar p-value of 1.0. Similar predictive performance should not be interpreted as unchanged connectivity: the mean participant-level Spearman correlation across directed connections is 0.0696, and the mean Jaccard overlap for the strongest 10% is 0.0674.
+
+### Reproducibility
+
+The CSV results can be inspected without retraining. To rerun the workflows, obtain the source EEG data separately, install the dependencies imported by the notebooks, and configure their input and output paths. Model checkpoints and intermediate binary TE arrays are not included in this directory and must be regenerated or supplied separately for notebook steps that require them. Metric values in the participant-level performance and difference tables are expressed as proportions; multiply by 100 to obtain percentages or percentage-point differences, respectively.
+
+
 Across the 11 completed configurations, the mean validation accuracy ranged from 81.63% to 89.78%, with a mean of 86.00%, a sample standard deviation of 2.45 percentage points, and a median of 86.20%. The total range was 8.15 percentage points. The selected reference configuration achieved 81.63%, whereas the highest validation objective, 89.78%, was obtained with \(D_x=6\), \(D_y=1\), \(\tau=4\), and \(\mu=1\).
 
 Because the configurations were compared using the same internal validation objective employed during hyperparameter analysis, the results should be interpreted as a structural sensitivity assessment rather than as evidence of improved held-out or externally validated performance.
