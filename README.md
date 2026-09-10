@@ -113,7 +113,8 @@ The fixed configuration below follows Table 2 of the revised manuscript.
 | [`ablation/`](ablation/) | `ablation-without-transformer.ipynb` and `ablation-without-te.ipynb` |
 | [`analysis/Interpretability/`](analysis/Interpretability/) | Connectivity inspection and representation characterization |
 | [`analysis/Subjects/`](analysis/Subjects/) | Participant-level evaluation notebooks for CTE-Net and each baseline |
-| [`partitions/`](partitions/) | Exact five-fold training, validation, and test assignments in `folds.pkl` |
+| [`folds.pkl`](folds.pkl) | Exact five-fold training, validation, and test assignments, supplied at the repository root |
+| [`partitions/`](partitions/) | Partition documentation and an additional copy of the partition file |
 | [`tests/`](tests/) | Statistical-analysis notebooks, post hoc sensitivity analyses, confusion-matrix exports, and the notebook smoke-test script |
 | [`supplementary_material/`](supplementary_material/) | Supplementary Data S1–S4 and their documentation |
 | [`requirements.txt`](requirements.txt) | Declared Python dependencies |
@@ -157,23 +158,23 @@ pip install -r requirements.txt
 
 1. Download the [EEG Data for ADHD/Control Children](https://ieee-dataport.org/open-access/eeg-data-adhd-control-children) dataset from IEEE DataPort.
 2. Place the participant `.mat` files in `data/raw/ieee/ADHD_group/` and `data/raw/ieee/Control_group/`.
-3. Copy the supplied exact partitions to the local path expected by the model notebooks.
+3. Copy `folds.pkl` from the repository root to `data/raw/folds.pkl`, the local path expected by the model notebooks. Run the following commands from the repository root (`CTE-Net/`).
 
 Linux or macOS:
 
 ```bash
 mkdir -p data/raw
-cp partitions/folds.pkl data/raw/folds.pkl
+cp folds.pkl data/raw/folds.pkl
 ```
 
 Windows PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Force data/raw
-Copy-Item partitions/folds.pkl data/raw/folds.pkl
+Copy-Item folds.pkl data/raw/folds.pkl
 ```
 
-The supplied file contains five tuples of `(train_subjects, validation_subjects, test_subjects)`. Each fold includes 76 training, 20 validation, and 24 test participants. Every participant appears exactly once in a test set across the five folds. Use this file to reproduce the published assignments; generating a new split does not reproduce the same experiment. See [`partitions/README.md`](partitions/README.md).
+The root-level [`folds.pkl`](folds.pkl) contains five tuples of `(train_subjects, validation_subjects, test_subjects)`. Each fold includes 76 training, 20 validation, and 24 test participants. Every participant appears exactly once in a test set across the five folds. Use this file to reproduce the published assignments; generating a new split does not reproduce the same experiment. The `partitions/` directory also contains a copy and documentation; the instructions here use the root-level file as the source.
 
 ### 5. Run an experiment
 
@@ -278,7 +279,7 @@ CAR preserved classification performance but yielded low concordance of detailed
 
 ## Reproducibility notes
 
-- Use `partitions/folds.pkl` to preserve the exact published subject assignments. Never randomly distribute windows from one participant across training, validation, and test subsets.
+- Use the root-level `folds.pkl`, copied to `data/raw/folds.pkl`, to preserve the exact published subject assignments. Never randomly distribute windows from one participant across training, validation, and test subsets.
 - Record condition, random seed, fold, checkpoint, and preprocessing settings for each run.
 - Fit predictive preprocessing and quality-screening thresholds using training participants only. Validation data guide model selection; test data are reserved for evaluation.
 - The representation-space analysis is a separate post hoc descriptive analysis: stage-specific standardization and PCA were fitted on out-of-fold test representations within each seed–fold. These transformations did not train the classifier or select its hyperparameters. The cosine-distance control omits PCA but still uses standardized features, so it does not establish independence from normalization.
