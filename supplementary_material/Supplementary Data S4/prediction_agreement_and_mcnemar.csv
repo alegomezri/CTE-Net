@@ -1,0 +1,2 @@
+original_condition,sensitivity_condition,n_subjects,probability_spearman,classification_agreement,original_correct_condition_incorrect,original_incorrect_condition_correct,exact_mcnemar_p
+original_A1A2_same_windows,filtered_clean_A1A2,120,0.6149038127647752,0.7166666666666667,24,10,0.024306510109454393

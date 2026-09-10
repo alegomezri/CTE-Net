@@ -1,0 +1,7 @@
+comparison,metric,difference,ci_95_lower,ci_95_upper
+filtered_clean_A1A2 minus original_A1A2_same_windows,accuracy,-0.09583333333333333,-0.16499999999999998,-0.027500000000000014
+filtered_clean_A1A2 minus original_A1A2_same_windows,sensitivity,0.03833333333333333,-0.031666666666666655,0.11166666666666666
+filtered_clean_A1A2 minus original_A1A2_same_windows,specificity,-0.23000000000000007,-0.3466666666666666,-0.11666666666666665
+filtered_clean_A1A2 minus original_A1A2_same_windows,precision,-0.137561981118188,-0.21120769226274055,-0.06352892869919657
+filtered_clean_A1A2 minus original_A1A2_same_windows,f1_score,-0.06389826252578418,-0.12064050085306931,-0.0050181088399774134
+filtered_clean_A1A2 minus original_A1A2_same_windows,roc_auc,-0.08225000000000002,-0.15913958333333325,-0.011022916666666717
